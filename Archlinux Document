@@ -1,0 +1,125 @@
+ls /sys/firmware/efi/efivars  (verify the boot mode)
+
+ip link (make sure my network interface is enable)
+
+ping archlinux.org   ( test whether my internet work)
+
+timedatectl set-ntp true (update the system clock)
+
+fdisk -l      ( show me the situation of my disk)
+
+
+fdisk /dev/sda   first partition
+press  g then press n ,  use +512M to limit the size , press t ,press  ef to change the type of partition type ,press w  to save it. Partition 1 is EFI system partition and 512 M size.(efi)
+
+mkfs.fat -F32 /dev/sda1   (format the partition.)   (first time I forgot to format sda1, sothat I can not mount the file system)
+
+fdisk /dev/sda     press n,  press +1G to set the size. This one is Linux swap with 1G size. (swap)
+mkswap /dev/sda2(initialize this partition)
+
+fdisk /dev/sda  ,  press n to partition it.   (This is root and size is remainder of the device, 18.5G (root))
+mkfs.ext4 /dev/sda3 (format this partition)
+
+mount /dev/sda3  /mnt   (mount the root)
+mkdir /mnt/boot (make a directory for sda1)
+mount /dev/sda1 /mnt/boot   (mount sda1 to /mnt/boot)
+swapon /dev/sda2 (enable swap volume)
+
+vim /etc/pacman.d/mirrorlist(change the mirror if you want)
+
+
+pacstrap /mnt base base-devel linux linux-firmware dhcpcd iwd vim sudo nano bash-completion(install essential packages)
+(first time I didn’t install dhcpcd so that my system can not connect internet after I complete install process)
+
+genfstab -L /mnt >> /mnt/etc/fstab  (generate an fstab file)
+
+cat /mnt/etc/fstab (check the file just created)
+
+arch-chroot /mnt (change root into the new system)
+TimeZone
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ( change the local time to shanghai)
+
+hwclock –systohc (generate /etc/adjtime)
+
+pacman -S vim dialog wpa_supplicant ntfs-3g networkmanager netctl (install some package)
+
+Localization
+vim /etc/locale.gen (edit the file) and uncomment en_US.UTF-8 UTF-8 
+
+locale-gen(generate locales)
+
+vim /etc/locale.conf   (insert “LANG=en_US.UTF-8”)
+vim /etc/hostname     (Arch is myhostname)
+vim /etc/hosts
+insert the below content.   
+(127.0.0.1	localhost
+::1		localhost
+127.0.1.1	Arch.localdomain	Arch)
+
+
+Passwd   (123456 ,  set the root password)
+
+pacman -S intel-ucode  (install intel ucode, because my device is intel cpu)
+
+pacman -S os-prober ntfs-3g  (install 2 package which helpful)
+
+pacman -S grub efibootmgr  (install grub and efibootmgr)
+
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+
+grub-mkconfig -o /boot/grub/grub.cfg  (generate config file)
+
+exit
+umount /mnt/boot
+umount /mnt
+reboot
+
+dhcpcd ( after reboot, I have to make sure my device internet works fine) 
+
+
+
+
+Swap file:
+dd if=/dev/zero of=/swapfile bs=1M count=512 status=progress （I create a swap file which 512 M）
+
+chmod 600 /swapfile
+
+mkswap /swapfile
+
+swapon /swapfile 
+
+vim /etc/fstab
+
+/swapfile none swap defaults 0 0
+
+Add user:
+useradd -m -G wheel zhr6212
+passwd zhr6212  1234567
+useradd -m -G wheel sal
+passwd sal    GraceHopper1906
+passwd -e sal 
+useradd -m -G wheel codi
+passwd codi    GraceHopper1906
+passwd -e codi
+
+visudo(uncomment the ‘%wheel ALL=(ALL)ALL’ to make sure ‘sal’ and ‘codi’ has sudo power)
+
+pacman -S sudo  (install sudo package)
+
+pacman -Ss xf86-video-nouveau  (install nvidia open source drive ,because my device is RTX 3060)
+
+sudo pacman -S xorg (install Xorg)
+sudo pacman -S xfce4 xfce4-goodies (install Xfce)
+
+sudo pacman -S sddm (install sddm)
+
+sudo systemctl enable sddm (enable sddm)
+
+sudo systemctl disable netctl  (disable netctl)
+sudo systemctl enable NetworkManager （enable networkmanager）
+
+sudo pacman -S network-manager-applet
+
+pacman -S openssh  (install ssh)
+pacman -S zsh       (install zsh)
+
