@@ -119,6 +119,7 @@ sudo systemctl disable netctl  (disable netctl)
 sudo systemctl enable NetworkManager （enable networkmanager）
 
 sudo pacman -S network-manager-applet
+reboot(finished)
 
 pacman -S openssh  (install ssh)
 pacman -S zsh       (install zsh)
