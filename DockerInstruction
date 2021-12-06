@@ -5,12 +5,16 @@ Docker Install:
 #The sentence start with # is the description and comment.
 
 sudo apt update
+
 sudo apt upgrade
 #type Y when it ask you to confirm 
+
 sudo apt install docker.io
 #type Y when it ask you to confirm 
+
 sudo service docker status
 #this command check whether the docker is running, if it is inactive use “sudo service docker start” to start it.
+
 sudo apt install curl 
 #install command curl
 
