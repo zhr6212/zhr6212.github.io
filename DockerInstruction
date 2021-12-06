@@ -1,0 +1,96 @@
+Docker Install:
+
+#This document is a instruction about how to install docker and WordPress websites via #docker in ubuntu system. 
+#The word like this are commands I used.
+#The sentence start with # is the description and comment.
+
+sudo apt update
+sudo apt upgrade
+#type Y when it ask you to confirm 
+sudo apt install docker.io
+#type Y when it ask you to confirm 
+sudo service docker status
+#this command check whether the docker is running, if it is inactive use “sudo service docker start” to start it.
+sudo apt install curl 
+#install command curl
+
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+#this command download the docker-compose file from url “https://github.com/.........etc”  and download it to our local directory.  (/usr/local/bin/)
+
+sudo chmod +x /usr/local/bin/docker-compose
+#add the execute permission to the file we just download.
+
+docker compose –version
+#this command is used to check if the docker compose is installed successfully.
+#After install the docker and compose, we can go to next step which WordPress install
+
+# following are WordPress install instruction:
+
+cd     
+# first of all , I like make project in user’s home directory. You can choose whatever directory you like.
+
+sudo mkdir word_press   
+# make a empty directory for project
+
+cd word_press
+#go to this folder
+
+sudo vi docker-compose.yml
+#create the file named “docker-compose.yml”
+#Copy below code to the docker-compose.yml.
+
+version: "3.9"
+    
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest
+    volumes:
+      - wordpress_data:/var/www/html
+    ports:
+      - "8000:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+volumes:
+  db_data: {}
+  wordpress_data: {}
+
+#this file contain 2 service. First one is DB(database) and second one is WordPress.
+1.	Image:  means the image used for the service, for example. Db use mysql:5.7and WordPress use the newest WordPress version. 
+2.	Volumes: means mount this service to a directory. Allowing you to modify the code on the fly, without having to rebuild the image
+3.	Restart: always means always restart.
+4.	Environment: means set the environment variable.(user, password, rootpassword etc…)
+5.	Depends_on: in WordPress service means the order of service to start. WordPress depends on db.so the db. should start first because WordPress depends on it.
+6.	Ports means the port to visit this service, for example I use my “Ip address:8000” to visit my WordPress website
+
+
+
+sudo docker-compose up -d
+#when you see the below notification, you are good to go, wait for several minutes then go to the browser.
+#“Status: Downloaded newer image for wordpress:latest
+#Creating my_wordpress_db_1 ... done
+#Creating my_wordpress_wordpress_1 ... done”
+
+#Use ip address:port to visit your wordpress website. The default port is 8000. Select a language and fill your information about your account.
+#After type your information and password. You will direct to login page
+#Use the password you set and log in to the main page.
+#Write the first blog and published it.
+#Finished!!
+
+
